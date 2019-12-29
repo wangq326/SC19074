@@ -1,0 +1,226 @@
+---
+title: "A-19074-2019-10-11"
+author: '19074'
+date: "2019/10/11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1 Question 1 : exercise 5.1
+
+Compute a Monte Carlo estimate of $\int_0^{\frac{\pi}{3}} sint dt$.
+
+## 1.1 Answer
+
+According to $\int_0^{\frac{\pi}{3}} sint dt=\frac{\pi}{3}E\left(sint\right),t\sim U\left(0,\frac{\pi}{3}\right)$ , we can calculate it as below.
+
+```{r}
+m <- 1e4   # number of samplings
+t <- runif(m, min=0, max=pi/3)   # generate samples from U(0,pi/3)
+theta.hat <- mean(sin(t)) * pi/3  # calculate theta.hat
+print(c(theta.hat,0.5))  # check it vs the true value
+```
+
+## 1.2 Analysis of the result
+
+It's easy to find that when the number of samplings is 10000, a Monte Carlo estimate of $\int_0^{\frac{\pi}{3}} sint dt$ is `r theta.hat`, which is close to the true value of it.
+
+## 2 Question 2 : exercise 5.10
+
+Use Monte Carlo integration with antithetic variables to estimate $\int_0^1\frac{e^{-x}}{\left(1+x^2\right)} dx$, and ﬁnd the approximatereduction in varianceas a percentage of the variance without variance reduction.
+
+## 2.1 Answer : Antithetic variables
+
+* step 1 : set the number of sampling $n$
+* step 2 : generate $\frac n2$ samples from U(0,1), $x_1,x_2,…,x_{\frac n2}$
+* step 3 : estimate it as $\hat\theta=\frac1n\sum_{j=1}^{n/2}\left(\frac {e^\left(-x_j\right)}{1+x_j^2}+\frac {e^\left(-1+x_j\right)}{1+(1-x_j)^2}\right)$, $U_j\sim U(0,x)$
+
+```{r}
+n <- 1e4   # number of samplings
+x <- runif(n/2, min=0, max=1)   # generate n/2 samples from U(0,1)
+y <- 1-x
+u <- exp(-x)/(1+x^2)
+v <- exp(-y)/(1+y^2)
+theta1.hat <- (mean(u)+mean(v))/2  
+sd1.hat <- sd((u+v)/2)
+# estimate it with antithetic variables 
+x1 <- runif(n, min=0, max=1)
+u1 <- exp(-x1)/(1+x1^2)
+theta2.hat <- mean(u1)
+sd2.hat <- sd(u1)
+# estimate it without variance reduction
+re.sd <- (sd2.hat-sd1.hat)/sd2.hat  #the approximate reduction in varianceas
+print(re.sd)
+```
+
+## 2.2 Analysis
+
+By using the antithetic variables method, the approximate reduction in variance is `r re.sd` of the variance without variance reduction. At almost the same calculation cost, the variance is reduced.
+
+## 3 Question 3 : exercise 5.15
+
+Obtain the stratiﬁed importance sampling estimate in Example 5.13 and compare it with the result of Example 5.10.
+
+Example 5.13 (Example 5.10, cont.) 
+In Example 5.10,our best result was obtained with importance function $f_3(x)= e^\left(−x\right)/(1−e^\left(−1\right))$,$0<x<1$. From 10000 replicates we obtained the estimate $\widehat\theta =0 .5257801$ and an estimated standard error 0.0970314. Now divide the interval (0,1) into ﬁve subintervals,$(j/5,(j +1)/5)$, $j =0 ,1,...,4$. Then on the $j$th subinterval variables are generated from the density $$\frac {5e^\left(-x\right)}{1-e^\left(-1\right)},\frac{j-1}{5}<x<\frac j5.$$ The implementation is left as an exercise. 
+
+Example 5.10 (Choice of the importance function) 
+In this example (from [64, p. 728]) several possible choices of importance functions to estimate $\int_0^1\frac{e^{-x}}{\left(1+x^2\right)} dx$ by importance sampling method are compared. The candidates for the importance functions are $$f_0(x)=1,0<x<1,$$
+$$f_1(x)=e^\left(-x\right),0<x<\infty,$$
+$$f_2(x)=(1+x^2)^\left(-1\right)/\pi,-\infty<x<\infty,$$
+$$f_3(x)=\frac {e^\left(-x\right)}{1-e^\left(-1\right)},0<x<1,$$
+$$f_4(x)=4(1+x^2)^\left(-1\right)/\pi,0<x<1$$
+
+## 3.0 Preface
+
+**Notice that 3.1 sections is computed according to the requirement of Example 5.13, and 3.2 section is computed as stated in page 147.**
+**也即3.1部分按照例13的要求计算，3.2部分按照课本p147的方法计算.**
+
+## 3.1 Answer
+
+### 3.1.1 Example 5.10 : Importance function
+
+* step 1 : set number of samples $m$
+* step 2 : generate samples $x_1,x_2,…,x_m$ from $f$
+* step 3 : estimate it as $\hat\theta=\frac1m\sum_{i=1}^m\frac{g(X_i)}{f(X_i)}$
+
+```{r,echo=TRUE}
+m <- 10000
+theta.hat <- se <- numeric(5)
+
+g <- function(x) {
+  exp(-x - log(1+x^2)) * (x > 0) * (x < 1)
+}
+
+x <- runif(m) #using f0
+fg <- g(x)
+theta.hat[1] <- mean(fg)
+se[1] <- sd(fg)
+
+x <- rexp(m, 1) #using f1
+fg <- g(x) / exp(-x)
+theta.hat[2] <- mean(fg)
+se[2] <- sd(fg)
+
+x <- rcauchy(m) #using f2
+i <- c(which(x > 1), which(x < 0))
+x[i] <- 2 #to catch overflow errors in g(x)
+fg <- g(x) / dcauchy(x)
+theta.hat[3] <- mean(fg)
+se[3] <- sd(fg)
+
+u <- runif(m) #f3, inverse transform method
+x <- - log(1 - u * (1 - exp(-1)))
+fg <- g(x) / (exp(-x) / (1 - exp(-1)))
+theta.hat[4] <- mean(fg)
+se[4] <- sd(fg)
+
+u <- runif(m) #f4, inverse transform method
+x <- tan(pi * u / 4)
+fg <- g(x) / (4 / ((1 + x^2) * pi))
+theta.hat[5] <- mean(fg)
+se[5] <- sd(fg)
+
+res <- rbind(theta=round(theta.hat,3), se=round(se,3))
+colnames(res) <- paste0('f',0:4)
+knitr::kable(res, format = "html",align='c')
+```
+
+### 3.1.2 Example 5.13 ： stratiﬁed importance sampling estimate
+
+To solve this problem, I'll follow the exercise description method to implement. 
+
+* step 1 : divide the real line into k intervals $(j/5,(j +1)/5)$, $j =0 ,1,...,4$
+* step 2 : for each subinterval $g_j(x)=g(x)I_{(j/5,(j +1)/5]}(x),j=1,2,…,k$
+* step 3 : for each subinterval $f_j(x)=\frac{1-e^\left(-1\right)}{e^\left(-\frac{i}{k}\right)-e^\left(-\frac{i+1}{k}\right)}f(x),x\in (j/5,(j +1)/5]$
+* step 4 : estimate $\theta_j=\int_{\frac j5}^{\frac{j+1}5}g_j(x)dx$ via importance function $f_j(x)$
+* step 5 : estimate it as $\theta=\sum_{j=1}^k\theta_j$
+
+```{r}
+M <- 10000
+k <- 5
+N <- 50
+
+a <- (seq(k+1)-1)/k
+
+g<-function(x)exp(-x)/(1+x^2)*(x>0)*(x<1)
+
+kcof <- function(i){
+  ans <- (1-exp(-1))/(exp(-(i-1)/k)-exp(-i/k))
+  ans
+}
+
+st.im <- function(i){
+  u <- runif(M/k)   # inverse transformation method
+  v <- - log(exp(-(i-1)/k)-(exp(-(i-1)/k)-exp(-i/k))*u)
+  fg <- g(v)/(kcof(i)*exp(-v)/(1-exp(-1)))
+  fg
+}
+est <- matrix(0,N,2)
+for (i in 1:N){
+  for (j in 1:k){
+    uu <- st.im(j)
+    est[i,1] <- est[i,1]+mean(uu)
+    est[i,2] <- est[i,2]+sd(uu)
+  }
+}
+ans <- rbind(apply(est,2,mean),apply(est,2,sd))
+colnames(ans) <- c('mean','sd')
+library(knitr)
+knitr::kable(ans,format='html')
+```
+
+### 3.1.3 Analysis
+
+By comparing the results of importance estimation and stratified importance estimation, we can find that the variance of stratified importance estimation is `r mean(est[,2])` which is about 1/5 of the variance of the importance sampling.
+
+## 3.2 Another way for stratified importance estimation
+
+As it's stated in Chap 5.8, I'll divide the interval in another way.
+
+* step 1 : divide the real line into k intervals $I_j=[a_{j-1},a_j),j=1,2,…,k$ where $a_j=F^{-1}(\frac jk)=-ln(1-\frac j5(1-e^{-1})),j=1,2,…,k-1$ and $a_0=-\infty,a_k=\infty$
+* step 2 : for each subinterval $g_j(x)=g(x)I_{[a_{j-1},a_j)}(x),j=1,2,…,k$
+* step 3 : for each subinterval $f_j(x)=kf(x),x\in I_j$
+* step 4 : estimate $\theta_j=\int_{a_{j-1}}^{a_j}g_j(x)dx$ via importance function $f_j(x)$
+* step 5 : estimate it as $\theta=\sum_{j=1}^k\theta_j$
+
+```{r}
+M <- 10000
+k <- 5
+N <- 50
+
+a <- numeric(k+1)
+for (l in 2:k)
+  a[l]=-log(1-(l-1)*(1-exp(-1))/k)
+a[k+1] <- 1
+a[1] <- 0
+# divide the real line into k intervals
+
+g<-function(x)exp(-x)/(1+x^2)*(x>0)*(x<1)
+# integrated function
+
+st.im <- function(lower,upper){
+  u <- runif(M/k)   # inverse transformation method
+  v <- -log(exp(-lower)-(1-exp(-1))*u/k)
+  fg <- g(v)/(k*exp(-v)/(1-exp(-1)))
+  fg
+}
+# samples from interval [lower,upper)
+
+est <- matrix(0,N,2)
+for (i in 1:N){
+  for (j in 1:k){
+    uu <- st.im(a[j],a[j+1])
+    est[i,1] <- est[i,1]+mean(uu)
+    est[i,2] <- est[i,2]+sd(uu)
+  }
+}
+ans <- rbind(apply(est,2,mean),apply(est,2,sd))
+colnames(ans) <- c('mean','sd')
+library(knitr)
+knitr::kable(ans,format='html')
+```
+We can find that the variance is `r mean(est[,2])`,which approximates the variance of another way.
