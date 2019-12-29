@@ -1,0 +1,228 @@
+---
+title: 'Homework of Chap 6 : MC Methods for Hypothesis Testing'
+author: '19074'
+date: "2019/11/6"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exercise 6.7
+
+Estimate the power of the skewness test of normality against symmetric $Beta(\alpha,\alpha)$ distributions and comment on the results. Are the results different for heavy-tailed symmetric alternatives such as $t(ν)$?
+
+## Solution 1 
+
+* (1) 
+The population is Beta($\alpha_{1},\alpha_{2}$).
+
+```{r}
+set.seed(1107)
+sk <- function(x) {
+  #computes the sample skewness 
+  xbar <- mean(x) 
+  m3 <- mean((x - xbar)^3) 
+  m2 <- mean((x - xbar)^2) 
+  return(m3 / m2^1.5) 
+} 
+Powersktest1 <- function(a){
+  n <- 20 #sample sizes
+  cv <- qnorm(.975, 0, sqrt(6*(n-2)/(n+1)/(n+3))) 
+  #crit. values for each n
+  p.reject <- numeric(length(a)) #to store sim. results 
+  m <- 10000 #num. repl. each sim.
+  for (i in 1:length(a)) { 
+    sktests <- numeric(m) #test decisions 
+    for (j in 1:m) { 
+      x <- rbeta(n,2,a[i]) #test decision is 1 (reject) or 0
+      sktests[j] <- as.integer(abs(sk(x)) >= cv) 
+      } 
+    p.reject[i] <- mean(sktests) #proportion rejected 
+    }
+return(p.reject)
+}
+a <- seq(2.5,10,.1)
+plot(cbind('alpha 2'=a,'power'=Powersktest1(a)))
+```
+
+We found that when $\alpha_{2}$ incereses, power increases. When $\alpha_{2}$ is up to 10, the power function is less than 0.3.
+
+* (2) The population is t($v$).
+
+```{r}
+Powersktest2 <- function(a2){
+  a1 <- 2
+  n <- 20 #sample sizes
+  cv <- qnorm(.975, 0, sqrt(6*(n-2)/(n+1)/(n+3))) #crit. values for each n
+  p.reject <- numeric(length(v)) #to store sim. results 
+  m <- 10000 #num. repl. each sim.
+  for (i in 1:length(v)) { 
+    sktests <- numeric(m) #test decisions 
+    for (j in 1:m) { 
+      x <- rt(n,v[i]) #test decision is 1 (reject) or 0
+      sktests[j] <- as.integer(abs(sk(x)) >= cv) 
+      } 
+    p.reject[i] <- mean(sktests) #proportion rejected 
+    }
+return(p.reject)
+}
+
+v <- seq(0.5,10,.1)
+plot(cbind(v,'power'=Powersktest2(v)))
+```
+
+* We found that when the t-distribution is between 4 and 10 degrees of freedom, power is around 0.2 and only when degrees of freedom are samll the power function is large.
+
+## Solution 2 : The ieda comes from Ex 6.10.
+
+* (1) In this example, we estimate by simulation the power of the skewness test of normality against a contaminatedbeta alternative. The contaminated beta distribution is denoted by $(1−\epsilon)Beta(\alpha=1,\beta=1)+\epsilon Beta(\alpha=500,\beta=500),0\le\epsilon\le1.$
+
+```{r}
+alpha <- .1 
+n <- 30 
+m <- 2500 
+epsilon <- c(seq(0, .15, .01), seq(.15, 1, .05)) 
+N <- length(epsilon) 
+pwr <- numeric(N) #critical value for the skewness test 
+cv <- qnorm(1-alpha/2, 0, sqrt(6*(n-2) / ((n+1)*(n+3))))
+for (j in 1:N) { 
+  #for each epsilon 
+  e <- epsilon[j] 
+  sktests <- numeric(m) 
+  for (i in 1:m) { 
+    #for each replicate 
+    a <- sample(c(1, 500), replace = TRUE, size = n, prob = c(1-e, e)) 
+    x <- rbeta(n, a, a) 
+    sktests[i] <- as.integer(abs(sk(x)) >= cv) 
+    } 
+  pwr[j] <- mean(sktests) } 
+#plot power vs epsilon 
+plot(epsilon, pwr, type = "b", xlab = bquote(epsilon), ylim = c(0,1)) 
+abline(h = .1, lty = 3) 
+se <- sqrt(pwr * (1-pwr) / m) 
+#add standard errors 
+lines(epsilon, pwr+se, lty = 3) 
+lines(epsilon, pwr-se, lty = 3)
+```
+
+   + Empirical power $\hat\pi(\epsilon)+\hat{se}(\hat\pi(\epsilon))$ for the skewnesstest of normality against $\epsilon$-contaminated beta scale mixture alternative.The empirical power curve is shown in Figure above. 
+   + Note that the power curve crosses the horizontal line corresponding to $\alpha$ =0.10 at both endpoints, $\epsilon$=0 and $\epsilon$=1 where the alternative is beta distributed. For $0.5<\epsilon<1$ the empirical power of the test is greater than 0.10 and highest when ε is about 0.9. ) for the skewnesstest of normality against ε-contaminated beta scale mixture alternative.
+
+* (2) In this example, we estimate by simulation the power of the skewness test of normality against a contaminatedt alternative. The contaminated student t distribution is denoted by $(1−\epsilon)t(v)+\epsilon t(v),0\le\epsilon\le1.$
+
+```{r}
+alpha <- .1 
+n <- 30 
+m <- 2500 
+epsilon <- c(seq(0, .15, .01), seq(.15, 1, .05)) 
+N <- length(epsilon) 
+pwr <- numeric(N) #critical value for the skewness test 
+cv <- qnorm(1-alpha/2, 0, sqrt(6*(n-2) / ((n+1)*(n+3))))
+for (j in 1:N) { 
+  #for each epsilon 
+  e <- epsilon[j] 
+  sktests <- numeric(m) 
+  for (i in 1:m) { 
+    #for each replicate 
+    v <- sample(c(1, 20), replace = TRUE, size = n, prob = c(1-e, e)) 
+    x <- rt(n, v) 
+    sktests[i] <- as.integer(abs(sk(x)) >= cv) 
+    } 
+  pwr[j] <- mean(sktests) } 
+#plot power vs epsilon 
+plot(epsilon, pwr, type = "b", xlab = bquote(epsilon), ylim = c(0,1)) 
+abline(h = .1, lty = 3) 
+se <- sqrt(pwr * (1-pwr) / m) 
+#add standard errors 
+lines(epsilon, pwr+se, lty = 3) 
+lines(epsilon, pwr-se, lty = 3)
+```
+
+  + Empirical power $\hat\pi(\epsilon)+\hat{se}(\hat\pi(\epsilon))$ for the skewnesstest of normality against $\epsilon$-contaminated beta scale mixture alternative.The empirical power curve is shown in Figure above. 
+  + Note that the power curve crosses the horizontal line corresponding to $\alpha$ =0.10 at both endpoints, $\epsilon$=0 and $\epsilon$=1 where the alternative is t distributed. For $0<\epsilon<1$ the empirical power of the test is greater than 0.10 and highest when ε is about 0.) for the skewnesstest of normality against ε-contaminated t scale mixture alternative.
+
+
+
+# Exercise 6.A 
+
++ Use Monte Carlo simulation to investigate whether the empirical Type I error rate of the t-test is approximately equal to the nominal signiﬁcance level $\alpha$, when the sampled population is non-normal. The t-test is robust to mild departures from normality. Discuss the simulation results for the cases where the sampled population is 
+  + $(1)$ $\chi^{2}(1)$, 
+  + $(2)$ $U(0,2)$,  
+  + $(3)$ $Exp(1)$. 
++ In each case, test $H_{0}:\mu=\mu_{0}$ vs $H_{0}:\mu\not=\mu_{0}$, where $\mu_{0}$ is the mean of $\chi^{2}(1)$, $Uniform(0,2)$, and Exponential(1), respectively. 
+
+```{r}
+t1e <- numeric(3)
+n <- 200 
+m <- 1000 
+```
+
+* (1) The sampled population is$\chi^{2}(1)$. 
+
+```{r}
+pvalues <- replicate(m, expr = { 
+  #simulate under alternative mu1 
+  x <- rchisq(n, df = 1) 
+  ttest <- t.test(x, alternative = "two.sided", mu = 1) 
+  ttest$p.value     
+  })
+t1e[1] <- mean(pvalues <= .05) 
+t1e[1]
+```
+
+* (2) The sampled population is $U(0,2)$. 
+
+```{r}
+pvalues <- replicate(m, expr = { 
+  #simulate under alternative mu1 
+  x <- runif(n, max = 2,min = 0) 
+  ttest <- t.test(x, alternative = "two.sided", mu = 1) 
+  ttest$p.value     
+  })
+t1e[2] <- mean(pvalues <= .05) 
+t1e[2]
+```
+
+* (3) The sampled population is $Exp(1)$. 
+
+```{r}
+pvalues <- replicate(m, expr = { 
+  #simulate under alternative mu1 
+  x <- rexp(n, rate = 1) 
+  ttest <- t.test(x, alternative = "two.sided", mu = 1) 
+  ttest$p.value     
+  })
+t1e[3] <- mean(pvalues <= .05) 
+t1e[3]
+```
+
+```{r}
+distribution <- c('chisq(1)','unif(0,2)','exp(1)')
+rbind(distribution,'type 1 error' = t1e)
+```
+
+* We can find that the empirical Type I error rate of the t-test is approximately approximate equal to the nominal signiﬁcance level $\alpha$, when the sampled population is non-normal. 
+* The t-test is robust to mild departures from normality. When the sampled population is $\chi^{2}(1)$, $U(0,2)$, $Exp(1)$. 
+
+# Exercise : Discussion from slide P22
+
+If we obtain the powers for two methods under a particular simulation setting with 10,000 experiments: say, 0.651 for one method and 0.676 for another method. Can we say the powers are different at 0.05 level? 
++ What is the corresponding hypothesis test problem? 
++ What test should we use? Z-test, two-sample t-test, paired-t test or McNemar test? 
++ What information is needed to test your hypothesis?
+
+## Answer
+
++ The corrsponding hypothesis test is $H_{0}:power_{1}=power_{2}$
++ We should use paired-t test.
++ The information needed is 
+  +  $X_{11},...,X_{1n}$ and $X_{21},...,X_{2n}$ 
+  +  The distribution of test statistic.
+
+
+
+
+
+
