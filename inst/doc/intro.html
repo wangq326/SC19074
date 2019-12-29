@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="19074" />
+
+<meta name="date" content="2019-12-29" />
+
+<title>Introduction to SC19074</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to SC19074</h1>
+<h4 class="author">19074</h4>
+<h4 class="date">2019-12-29</h4>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p><strong>SC19074</strong> is R package developed to solve the tuning parameter <span class="math inline">\(\lambda\)</span> selection problem in reduced rank regression model. Seven functions are considered, namely, <em>get_coef_subspace_sim</em> (obtain the variance under each lambda by the cofficient matrices) and <em>rrr.sim6</em> (generate random samples) and <em>stability_ann_sim</em>(RRR via stability approach) and so on.</p>
+</div>
+<div id="the-main-results" class="section level2">
+<h2>The main results</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(tidyverse)</a></code></pre></div>
+<pre><code>## ── Attaching packages ─────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## &lt;U+2713&gt; ggplot2 3.2.1     &lt;U+2713&gt; purrr   0.3.3
+## &lt;U+2713&gt; tibble  2.1.3     &lt;U+2713&gt; dplyr   0.8.3
+## &lt;U+2713&gt; tidyr   1.0.0     &lt;U+2713&gt; stringr 1.4.0
+## &lt;U+2713&gt; readr   1.3.1     &lt;U+2713&gt; forcats 0.4.0</code></pre>
+<pre><code>## ── Conflicts ────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">library</span>(rrpack)</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="kw">library</span>(knitr)</a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="kw">library</span>(mvtnorm)</a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="kw">library</span>(gridExtra)</a></code></pre></div>
+<pre><code>## 
+## 载入程辑包：&#39;gridExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">library</span>(MASS)</a></code></pre></div>
+<pre><code>## 
+## 载入程辑包：&#39;MASS&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     select</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">library</span>(xtable)</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="kw">set.seed</span>(<span class="dv">6419</span>)</a></code></pre></div>
+<p>In the reduced rank regression model via adaptive nuclear norm penalization proposed by Kun Chen, there is no tuning parameter selection method. We apply the stability method. In this problem, we define the instability as: given a lambda, a regression coefficient matrix <span class="math inline">\(\hat C\)</span> can be obtained by applying the reduced rank regression model to each subsample. We define the variance of these matrices as instability. The variance is defined as follows: <span class="math display">\[var(\hat C_{1},\hat C_{2},...\hat C_{n})=(C_{2}^{n})^{-1}\sum_{i&lt;j}d(\hat C_{i},\hat C_{j}).\]</span> The distance between the two matrices is defined as <span class="math display">\[d(\mathcal{A},\mathcal{B})=max{\sigma_{1}(A_{\bot}^{H}B),\sigma_{1}(B_{\bot}^{H}A)},\]</span> Where <span class="math inline">\(A_{\bot}^{H}\)</span> is the basis of the orthogonal complement of <span class="math inline">\(\mathcal{A}\)</span>, and <span class="math inline">\(A\)</span> is a set of orthogonal basis of <span class="math inline">\(\mathcal{A}\)</span>.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">n =<span class="st"> </span><span class="dv">38</span> <span class="co"># samples</span></a>
+<a class="sourceLine" id="cb12-2" title="2">q =<span class="st"> </span><span class="dv">44</span> <span class="co"># number of response variables</span></a>
+<a class="sourceLine" id="cb12-3" title="3">rho =<span class="st"> </span><span class="fl">0.5</span> <span class="co"># correlation between Xs</span></a>
+<a class="sourceLine" id="cb12-4" title="4">rX =<span class="st"> </span><span class="dv">8</span> <span class="co"># rank of X</span></a>
+<a class="sourceLine" id="cb12-5" title="5">r =<span class="st"> </span><span class="dv">5</span> <span class="co"># rank of C</span></a>
+<a class="sourceLine" id="cb12-6" title="6">p =<span class="st"> </span><span class="dv">23</span> <span class="co"># number of explanatory variables</span></a></code></pre></div>
+<p>b set to 0.05</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">library</span>(SC19074)</a>
+<a class="sourceLine" id="cb13-2" title="2">sim21 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, r, <span class="dt">b =</span> <span class="fl">0.05</span>, rho, rX)</a>
+<a class="sourceLine" id="cb13-3" title="3">sim_ann21 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(sim21<span class="op">$</span>Y, sim21<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb13-4" title="4">                 <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb13-5" title="5">sim_res21 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(sim21<span class="op">$</span>Y, sim21<span class="op">$</span>X, sim_ann21<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a></code></pre></div>
+<p>b set to0.1</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">sim22 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, r, <span class="dt">b =</span> <span class="fl">0.1</span>, rho, rX)</a>
+<a class="sourceLine" id="cb14-2" title="2">sim_ann22 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(sim22<span class="op">$</span>Y, sim22<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb14-3" title="3">                 <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb14-4" title="4">sim_res22 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(sim22<span class="op">$</span>Y, sim22<span class="op">$</span>X, sim_ann22<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a></code></pre></div>
+<p>b set to 0.3</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">sim23 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, r, <span class="dt">b =</span> <span class="fl">0.3</span>, rho, rX)</a>
+<a class="sourceLine" id="cb15-2" title="2">sim_ann23 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(sim23<span class="op">$</span>Y, sim23<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb15-3" title="3">                 <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb15-4" title="4">sim_res23 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(sim23<span class="op">$</span>Y, sim23<span class="op">$</span>X, sim_ann23<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a></code></pre></div>
+<p>b set to 0</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="co"># Rank 0</span></a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="co"># Generate X</span></a>
+<a class="sourceLine" id="cb16-3" title="3">p =<span class="st"> </span><span class="dv">46</span></a>
+<a class="sourceLine" id="cb16-4" title="4">sim4 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, r, <span class="dt">b =</span> <span class="dv">0</span>, rho, rX)</a>
+<a class="sourceLine" id="cb16-5" title="5">sim_ann4 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(sim4<span class="op">$</span>Y, sim4<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb16-6" title="6">                 <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb16-7" title="7">sim_res4 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(sim4<span class="op">$</span>Y, sim4<span class="op">$</span>X, sim_ann4<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">detach</span>(<span class="st">&quot;package:rrpack&quot;</span>, <span class="dt">unload =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb17-2" title="2"><span class="kw">detach</span>(<span class="st">&quot;package:MASS&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb17-3" title="3"></a>
+<a class="sourceLine" id="cb17-4" title="4"><span class="co"># ---- stability-s2n-table ----</span></a>
+<a class="sourceLine" id="cb17-5" title="5"><span class="co"># Table of signal to noise ratios for each simulation</span></a>
+<a class="sourceLine" id="cb17-6" title="6">s2n_table &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">Simulation =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dt">n =</span> n, <span class="dt">p =</span> p, <span class="dt">q =</span> q, <span class="dt">b =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>),</a>
+<a class="sourceLine" id="cb17-7" title="7">                       <span class="st">&quot;Signal to noise ratio&quot;</span> =<span class="st"> </span><span class="kw">c</span>(sim4<span class="op">$</span>s2n, sim21<span class="op">$</span>s2n, sim22<span class="op">$</span>s2n, sim23<span class="op">$</span>s2n),</a>
+<a class="sourceLine" id="cb17-8" title="8">                       <span class="dt">check.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb17-9" title="9"><span class="kw">print</span>(<span class="kw">xtable</span>(s2n_table, <span class="dt">label =</span> <span class="st">&quot;tab:stability-s2n-table&quot;</span>,</a>
+<a class="sourceLine" id="cb17-10" title="10">       <span class="dt">caption =</span> <span class="st">&quot;Parameters and signal to noise ratios for the four simulated datasets.&quot;</span>,</a>
+<a class="sourceLine" id="cb17-11" title="11">       <span class="dt">digits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">3</span>)),</a>
+<a class="sourceLine" id="cb17-12" title="12">      <span class="dt">include.rownames =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<pre><code>## % latex table generated in R 3.6.2 by xtable 1.8-4 package
+## % Sun Dec 29 21:50:04 2019
+## \begin{table}[ht]
+## \centering
+## \begin{tabular}{rrrrrr}
+##   \hline
+## Simulation &amp; n &amp; p &amp; q &amp; b &amp; Signal to noise ratio \\ 
+##   \hline
+## 1 &amp; 38 &amp; 46 &amp; 44 &amp; 0.00 &amp; 0.000 \\ 
+##   2 &amp; 38 &amp; 46 &amp; 44 &amp; 0.05 &amp; 0.565 \\ 
+##   3 &amp; 38 &amp; 46 &amp; 44 &amp; 0.10 &amp; 0.958 \\ 
+##   4 &amp; 38 &amp; 46 &amp; 44 &amp; 0.30 &amp; 4.623 \\ 
+##    \hline
+## \end{tabular}
+## \caption{Parameters and signal to noise ratios for the four simulated datasets.} 
+## \label{tab:stability-s2n-table}
+## \end{table}</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="co"># ---- stability-sims-plots ----</span></a>
+<a class="sourceLine" id="cb19-2" title="2">stability_combine_sim &lt;-<span class="st"> </span><span class="cf">function</span>(stability_ann_results){</a>
+<a class="sourceLine" id="cb19-3" title="3">  st_plot &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">rank =</span> <span class="kw">c</span>(stability_ann_results<span class="op">$</span>st_res),</a>
+<a class="sourceLine" id="cb19-4" title="4">                        <span class="dt">lambda =</span> <span class="kw">rep</span>(stability_ann_results<span class="op">$</span>lambda, <span class="dt">each =</span> <span class="kw">nrow</span>(stability_ann_results<span class="op">$</span>st_res)))</a>
+<a class="sourceLine" id="cb19-5" title="5">  st_group &lt;-<span class="st"> </span><span class="kw">group_by</span>(st_plot, <span class="dt">by =</span> lambda)</a>
+<a class="sourceLine" id="cb19-6" title="6">  st_sum &lt;-<span class="st"> </span><span class="kw">summarize</span>(st_group, <span class="dt">var =</span> <span class="kw">var</span>(rank), <span class="dt">avg =</span> <span class="kw">mean</span>(rank)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">rename</span>(<span class="dt">lambda =</span> by)</a>
+<a class="sourceLine" id="cb19-7" title="7">  st_sum &lt;-<span class="st"> </span><span class="kw">full_join</span>(st_sum, stability_ann_results<span class="op">$</span>st_coef, <span class="dt">by =</span> <span class="st">&quot;lambda&quot;</span>)</a>
+<a class="sourceLine" id="cb19-8" title="8">}</a>
+<a class="sourceLine" id="cb19-9" title="9">stability_plots_sim &lt;-<span class="st"> </span><span class="cf">function</span>(sim_results, rank, <span class="dt">title =</span> <span class="st">&quot;sim_results&quot;</span>, <span class="dt">subtitle =</span> <span class="st">&quot;&quot;</span>){</a>
+<a class="sourceLine" id="cb19-10" title="10">  st_combined &lt;-<span class="st"> </span><span class="kw">stability_combine_sim</span>(sim_results)</a>
+<a class="sourceLine" id="cb19-11" title="11">  <span class="co"># Plot mean vs variance</span></a>
+<a class="sourceLine" id="cb19-12" title="12">  varmeanplot &lt;-<span class="st"> </span><span class="kw">ggplot</span>(st_combined, <span class="kw">aes</span>(<span class="dt">x =</span> avg, <span class="dt">y =</span> <span class="kw">sqrt</span>(var))) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb19-13" title="13"><span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-14" title="14"><span class="st">    </span><span class="kw">geom_vline</span>(<span class="kw">aes</span>(<span class="dt">xintercept =</span> rank)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-15" title="15"><span class="st">    </span><span class="kw">xlab</span>(<span class="st">&quot;Mean estimated rank&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb19-16" title="16"><span class="st">    </span><span class="kw">ylab</span>(<span class="st">&quot;Standard deviation of subspace distance&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-17" title="17"><span class="st">    </span><span class="kw">ggtitle</span>(title, <span class="dt">subtitle =</span> subtitle) <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-18" title="18"><span class="st">    </span><span class="kw">theme_bw</span>()</a>
+<a class="sourceLine" id="cb19-19" title="19">  <span class="co"># Plot mean vs variance of coefficients</span></a>
+<a class="sourceLine" id="cb19-20" title="20">  coefplot &lt;-<span class="st"> </span><span class="kw">ggplot</span>(st_combined, <span class="kw">aes</span>(<span class="dt">x =</span> avg, <span class="dt">y =</span> <span class="kw">sqrt</span>(var.subspace.coef))) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb19-21" title="21"><span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-22" title="22"><span class="st">    </span><span class="kw">geom_vline</span>(<span class="kw">aes</span>(<span class="dt">xintercept =</span> rank)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-23" title="23"><span class="st">    </span><span class="kw">xlab</span>(<span class="st">&quot;Mean estimated rank&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb19-24" title="24"><span class="st">    </span><span class="kw">ylab</span>(<span class="kw">expression</span>(<span class="kw">sqrt</span>(<span class="st">&quot;Mean of coefficient ranks&quot;</span>))) <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-25" title="25"><span class="st">    </span><span class="kw">ggtitle</span>(title, <span class="dt">subtitle =</span> subtitle) <span class="op">+</span></a>
+<a class="sourceLine" id="cb19-26" title="26"><span class="st">    </span><span class="kw">theme_bw</span>()</a>
+<a class="sourceLine" id="cb19-27" title="27">  </a>
+<a class="sourceLine" id="cb19-28" title="28">  <span class="kw">return</span>(<span class="kw">list</span>(<span class="dt">rplot =</span> varmeanplot, <span class="dt">coefplot =</span> coefplot))</a>
+<a class="sourceLine" id="cb19-29" title="29">}</a></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">p21 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_res21, <span class="dt">rank =</span> r, <span class="dt">title =</span> <span class="st">&quot;Simulation 2&quot;</span>, <span class="dt">subtitle =</span> <span class="st">&quot;b = 0.05&quot;</span>)</a>
+<a class="sourceLine" id="cb20-2" title="2"></a>
+<a class="sourceLine" id="cb20-3" title="3">p22 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_res22, <span class="dt">rank =</span> r, <span class="dt">title =</span> <span class="st">&quot;Simulation 3&quot;</span>, <span class="dt">subtitle =</span> <span class="st">&quot;b = 0.1&quot;</span>)</a>
+<a class="sourceLine" id="cb20-4" title="4"></a>
+<a class="sourceLine" id="cb20-5" title="5">p23 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_res23, <span class="dt">rank =</span> r, <span class="dt">title =</span> <span class="st">&quot;Simulation 4&quot;</span>, <span class="dt">subtitle =</span> <span class="st">&quot;b = 0.3&quot;</span>)</a>
+<a class="sourceLine" id="cb20-6" title="6"></a>
+<a class="sourceLine" id="cb20-7" title="7">p4 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_res4, <span class="dt">rank =</span> <span class="dv">0</span>, <span class="dt">title =</span> <span class="st">&quot;Simulation 1&quot;</span>, <span class="dt">subtitle =</span> <span class="st">&quot;b = 0&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="co"># ---- stability-sims-rplots ----</span></a>
+<a class="sourceLine" id="cb21-2" title="2"><span class="kw">grid.arrange</span>(p4<span class="op">$</span>rplot, p21<span class="op">$</span>rplot, p22<span class="op">$</span>rplot, p23<span class="op">$</span>rplot, <span class="dt">nrow =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="co"># ---- stability-sims-coefplots ----</span></a>
+<a class="sourceLine" id="cb22-2" title="2"><span class="kw">grid.arrange</span>(p4<span class="op">$</span>coefplot, p21<span class="op">$</span>coefplot, p22<span class="op">$</span>coefplot, p23<span class="op">$</span>coefplot, <span class="dt">nrow =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1"><span class="co"># ---- stability-sims-r0-plots ----</span></a>
+<a class="sourceLine" id="cb23-2" title="2"><span class="kw">grid.arrange</span>(p4<span class="op">$</span>rplot, p4<span class="op">$</span>coefplot, <span class="dt">nrow =</span> <span class="dv">1</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="co"># ---- rank1-sims ----</span></a>
+<a class="sourceLine" id="cb24-2" title="2"><span class="co"># Simulations and plots for rank 1 matrices</span></a>
+<a class="sourceLine" id="cb24-3" title="3"><span class="kw">set.seed</span>(<span class="dv">9988999</span>)</a>
+<a class="sourceLine" id="cb24-4" title="4">n =<span class="st"> </span><span class="dv">38</span> <span class="co"># samples</span></a>
+<a class="sourceLine" id="cb24-5" title="5">q =<span class="st"> </span><span class="dv">44</span> <span class="co"># number of response variables</span></a>
+<a class="sourceLine" id="cb24-6" title="6">rho =<span class="st"> </span><span class="fl">0.5</span> <span class="co"># correlation between Xs</span></a>
+<a class="sourceLine" id="cb24-7" title="7">rX =<span class="st"> </span><span class="dv">8</span> <span class="co"># rank of X</span></a>
+<a class="sourceLine" id="cb24-8" title="8">p =<span class="st"> </span><span class="dv">23</span> <span class="co"># number of explanatory variables</span></a>
+<a class="sourceLine" id="cb24-9" title="9">simr1 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, <span class="dt">r=</span><span class="dv">1</span>, <span class="dt">b =</span> <span class="fl">0.3</span>, rho, rX)</a></code></pre></div>
+<pre><code>## 
+## 载入程辑包：&#39;MASS&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     select</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">simr1<span class="op">$</span>s2n</a></code></pre></div>
+<pre><code>## [1] 15.30824</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1">sim_annr1 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(simr1<span class="op">$</span>Y, simr1<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb29-2" title="2">                  <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb29-3" title="3">sim_resr1 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(simr1<span class="op">$</span>Y, simr1<span class="op">$</span>X, sim_annr1<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb29-4" title="4"></a>
+<a class="sourceLine" id="cb29-5" title="5">simr12 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, <span class="dt">r=</span><span class="dv">1</span>, <span class="dt">b =</span> <span class="fl">0.05</span>, rho, rX)</a>
+<a class="sourceLine" id="cb29-6" title="6">simr12<span class="op">$</span>s2n</a></code></pre></div>
+<pre><code>## [1] 3.469148</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">sim_annr12 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(simr12<span class="op">$</span>Y, simr12<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb31-2" title="2">                  <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb31-3" title="3">sim_resr12 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(simr12<span class="op">$</span>Y, simr12<span class="op">$</span>X, sim_annr12<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb31-4" title="4"></a>
+<a class="sourceLine" id="cb31-5" title="5">simr13 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, <span class="dt">r=</span><span class="dv">1</span>, <span class="dt">b =</span> <span class="fl">0.1</span>, rho, rX)</a>
+<a class="sourceLine" id="cb31-6" title="6">simr13<span class="op">$</span>s2n</a></code></pre></div>
+<pre><code>## [1] 3.642815</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1">sim_annr13 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(simr13<span class="op">$</span>Y, simr13<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb33-2" title="2">                  <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb33-3" title="3">sim_resr13 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(simr13<span class="op">$</span>Y, simr13<span class="op">$</span>X, sim_annr13<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb33-4" title="4"></a>
+<a class="sourceLine" id="cb33-5" title="5">simr14 &lt;-<span class="st"> </span><span class="kw">rrr.sim6</span>(n, p, q, <span class="dt">r=</span><span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">0</span>, rho, rX)</a>
+<a class="sourceLine" id="cb33-6" title="6">simr14<span class="op">$</span>s2n</a></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1">sim_annr14 &lt;-<span class="st"> </span><span class="kw">rrr2</span>(simr14<span class="op">$</span>Y, simr14<span class="op">$</span>X, <span class="dt">penaltySVD =</span> <span class="st">&quot;ann&quot;</span>,</a>
+<a class="sourceLine" id="cb35-2" title="2">                   <span class="dt">modstr =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb35-3" title="3">sim_resr14 &lt;-<span class="st"> </span><span class="kw">stability_ann_sim</span>(simr14<span class="op">$</span>Y, simr14<span class="op">$</span>X, sim_annr14<span class="op">$</span>lambda, <span class="dt">subset =</span> <span class="fl">0.7</span>, <span class="dt">ntimes =</span> <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb35-4" title="4"></a>
+<a class="sourceLine" id="cb35-5" title="5">pr1 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_resr1, <span class="dt">rank =</span> <span class="dv">1</span>, <span class="dt">title =</span> <span class="st">&quot;&quot;</span>, <span class="dt">subtitle =</span> <span class="kw">paste</span>(<span class="st">&quot;Signal-to-noise ratio: &quot;</span>, <span class="kw">round</span>(simr1<span class="op">$</span>s2n, <span class="dv">2</span>)))</a>
+<a class="sourceLine" id="cb35-6" title="6">pr12 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_resr12, <span class="dt">rank =</span> <span class="dv">1</span>, <span class="dt">title =</span> <span class="st">&quot;&quot;</span>, <span class="dt">subtitle =</span> <span class="kw">paste</span>(<span class="st">&quot;Signal-to-noise ratio: &quot;</span>, <span class="kw">round</span>(simr12<span class="op">$</span>s2n, <span class="dv">2</span>)))</a>
+<a class="sourceLine" id="cb35-7" title="7">pr13 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_resr13, <span class="dt">rank =</span> <span class="dv">1</span>, <span class="dt">title =</span> <span class="st">&quot;&quot;</span>, <span class="dt">subtitle =</span> <span class="kw">paste</span>(<span class="st">&quot;Signal-to-noise ratio: &quot;</span>, <span class="kw">round</span>(simr13<span class="op">$</span>s2n, <span class="dv">2</span>)))</a>
+<a class="sourceLine" id="cb35-8" title="8">pr14 &lt;-<span class="st"> </span><span class="kw">stability_plots_sim</span>(sim_resr14, <span class="dt">rank =</span> <span class="dv">1</span>, <span class="dt">title =</span> <span class="st">&quot;&quot;</span>, <span class="dt">subtitle =</span> <span class="kw">paste</span>(<span class="st">&quot;Signal-to-noise ratio: &quot;</span>, <span class="kw">round</span>(simr14<span class="op">$</span>s2n, <span class="dv">2</span>)))</a></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="kw">grid.arrange</span>(pr1<span class="op">$</span>coefplot, pr12<span class="op">$</span>coefplot, pr13<span class="op">$</span>coefplot, pr14<span class="op">$</span>coefplot, <span class="dt">nrow =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

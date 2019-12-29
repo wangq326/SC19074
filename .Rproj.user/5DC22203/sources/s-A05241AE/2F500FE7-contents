@@ -1,0 +1,14 @@
+Package: SC19074
+Type: Package
+Title: Reduced rank regression via stability approach
+Version: 1.0
+Date: 2019-12-27
+Author: wangq326
+Maintainer: wangq326 <wangq326@mail.ustc.edu.cn>
+Description: Obtain defined variance and bias under lambdas with rrr and generate random sample. 
+License: GPL (>= 2)
+Imports: Rcpp (>= 1.0.3)
+Suggests: knitr,rmarkdown
+VignetteBuilder: knitr 
+LinkingTo: Rcpp
+RoxygenNote: 7.0.2

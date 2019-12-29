@@ -1,0 +1,355 @@
+---
+title: "stab_sim_subspace"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# ---- stability-simulations ----
+
+library(tidyverse)
+library(rrpack)
+library(knitr)
+library(mvtnorm)
+library(gridExtra)
+library(MASS)
+
+library(xtable)
+
+set.seed(6419)
+#path="D:\referencecode" 
+#setwd(path)
+source("rrr2.R")
+```
+
+这里我们介绍一个结论：
+秩为r的矩阵A（m*n）的QR分解的Q具有很好的性质，
+Q[,1:r]为矩阵A的一组标准正交基
+Q[,r+1:m]为矩阵A的正交补的一组基
+
+$$var(\hat B_{1},\hat B_{2},...\hat B_{n})=(C_{2}^{n})^{-1}\sum_{i<j}d(\hat B_{i},\hat B_{j})$$
+
+```{r}
+# 计算系数的秩的均值，输入参数：多个系数矩阵
+get_coef_subspace_sim <- function(coef_res){
+  nlambdas <- length(coef_res[[1]])
+  ntimes <- length(coef_res)
+  
+  var.subspace.coef <- rep(0, nlambdas)
+  
+  n <- min(dim(coef_res[[1]][[1]]))
+  
+  for(lambda.i in 1:nlambdas){
+    Bj <- list()
+    Bjv <- list()
+    Bjb <- list()
+    for (time.j in 1:ntimes) {
+      Bj[[time.j]] <- coef_res[[time.j]][[lambda.i]]
+      r <- qr(Bj[[time.j]])$rank
+      Bjv[[time.j]] <- qr.Q(qr(Bj[[time.j]]))[,(r+1):n]
+      Bjb[[time.j]] <- qr.Q(qr(Bj[[time.j]]))[,1:r]
+    }
+    for (time.j1 in 2:ntimes) {
+      for (time.j2 in 1:(time.j1-1)) {
+        s1 <- svd(t(Bjv[[time.j1]])%*%Bjb[[time.j2]])$d[1]
+        s2 <- svd(t(Bjv[[time.j2]])%*%Bjb[[time.j1]])$d[1]
+        var.subspace.coef[lambda.i] <- var.subspace.coef[lambda.i]+max(s1,s2)
+      }
+    }
+  }
+  var.subspace.coef <- var.subspace.coef*2/(ntimes*(ntimes-1))
+  
+  return(var.subspace.coef)
+}
+
+
+# 输入X，responce=y，lambda=正则参数，subset=每次抽样的比例，ntimes=抽样的次数
+# 返回值：st_res[i，j]为第i次子抽样、第j个lambda的系数阵的rank
+#         st_coef为系数阵的总方差
+stability_ann_sim <- function(response, X, lambda, subset = 0.7, ntimes = 50){
+  # Function to run stability analysis for ANN reduced rank regression on simulated data
+  # Stability of rank for each lambda
+  # Rows are subsets, columns are lambdas
+
+  
+  st_res <- matrix(NA, nrow = ntimes, ncol = length(lambda))
+  # 稳定性矩阵，行数为子抽样数，列数为lambda数
+
+  # List: first index is over subsamples, second index over lambdas
+  coef_res <- list()
+  # Number to sample each time，每次抽样个数（从X、y中抽样）
+  nsample <- ceiling(subset*nrow(X))
+  
+  for(i in 1:ntimes){
+    # Rows to sample
+    
+    # 子样本
+    sample_i <- sample.int(nrow(X), size = nsample, replace = FALSE)
+    y_sub <- response[sample_i,]
+    x_sub <- X[sample_i,]
+    
+    # 子系数矩阵list
+    sub_res <- list()
+    for(j in 1:length(lambda)){
+      mod <- rrr2(as.matrix(y_sub), as.matrix(x_sub), penaltySVD = "ann",
+                  modstr = list(gamma = 2, lambda = lambda[j]))
+      st_res[i,j] <- mod$rank  
+      sub_res[[j]] <- mod$coef
+    }
+    coef_res[[i]] <- sub_res
+  }
+  
+  # Stability of coefficients for each lambda
+  st_coef <-data.frame(lambda = lambda, var.subspace.coef = get_coef_subspace_sim(coef_res))
+  
+  return(list(st_res = st_res, st_coef = st_coef, lambda = lambda))
+}
+
+# 生成数据的函数
+# 设置n、p、q为数据维数（X：n*p、Y：n*q）
+# X的秩为rX、rho为Xs的相关系数、C的秩为r
+# b为信噪比?；s2n是信噪比
+rrr.sim6 <- function(n, p, q, r, b, rho, rX){
+  library("MASS")
+  # Function to simulate data
+  # n =samples
+  # p = number of explanatory variables
+  # q = number of response variables
+  # rho = correlation between Xs
+  # rX = rank of X
+  # r = rank of C
+  # b = signal to noise ratio ?
+  # Simulate according to Chen, Dong, Chan for case where p,q >n
+  
+  # Generate C，能保证C的秩为r吗？
+  C1 <- matrix(rnorm(p*r), nrow = p, ncol = r)
+  C2 <- matrix(rnorm(q*r), nrow = q, ncol = r)
+  C <- b*C1 %*% t(C2)
+  
+  # Generate X
+  gamma <- matrix(0, nrow = p, ncol = p)
+  for (i in 1:p){
+    for (j in 1:p){
+      gamma[i,j] <- rho^(abs(i-j))
+    }
+  }
+  gamma.eig <- eigen(gamma)
+  gamma_sqrt <- gamma.eig$vectors %*% diag(sqrt(gamma.eig$values)) %*% solve(gamma.eig$vectors)
+  X1 <- matrix(rnorm(n*rX), nrow = n, ncol = rX)
+  X2 <- matrix(rnorm(rX*p), nrow = rX, ncol = p)
+  X0 <- X1 %*% X2
+  X <- X0 %*% gamma_sqrt
+  
+  # Generate Y
+  E <- matrix(rnorm(n*q), nrow = n, ncol = q)
+  Y <- X %*% C + E
+  
+  # Signal to noise ratio
+  svdxc <- svd(X%*%C)
+  P <- X %*% ginv(t(X) %*% X) %*% t(X)
+  svdpe <- svd(P %*% E)
+  s2n <- svdxc$d[r]/svdpe$d[1]
+  
+  return(list(Y = Y, X = X, C = C, s2n = s2n))
+}
+```
+
+
+
+```{r}
+n = 76 # samples
+q = 88 # number of response variables
+rho = 0.5 # correlation between Xs
+rX = 10 # rank of X
+r = 5 # rank of C
+
+p = 46 # number of explanatory variables
+```
+
+
+b设置为0.05（b和SNR正相关吗？）
+
+```{r}
+sim21 <- rrr.sim6(n, p, q, r, b = 0.05, rho, rX)
+# 生成数据
+sim_ann21 <- rrr2(sim21$Y, sim21$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+
+sim_res21 <- stability_ann_sim(sim21$Y, sim21$X, sim_ann21$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+b设置为0.1
+
+```{r}
+sim22 <- rrr.sim6(n, p, q, r, b = 0.1, rho, rX)
+sim_ann22 <- rrr2(sim22$Y, sim22$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res22 <- stability_ann_sim(sim22$Y, sim22$X, sim_ann22$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+b设置为0.3
+
+```{r}
+sim23 <- rrr.sim6(n, p, q, r, b = 0.3, rho, rX)
+sim_ann23 <- rrr2(sim23$Y, sim23$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res23 <- stability_ann_sim(sim23$Y, sim23$X, sim_ann23$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+b设置为0
+
+```{r}
+# Rank 0
+# Generate X
+p = 46
+sim4 <- rrr.sim6(n, p, q, r, b = 0, rho, rX)
+sim_ann4 <- rrr2(sim4$Y, sim4$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res4 <- stability_ann_sim(sim4$Y, sim4$X, sim_ann4$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+```{r}
+detach("package:rrpack", unload = TRUE)
+detach("package:MASS", unload=TRUE)
+
+# ---- stability-s2n-table ----
+# Table of signal to noise ratios for each simulation
+s2n_table <- data.frame(Simulation = 1:4, n = n, p = p, q = q, b = c(0, 0.05, 0.1, 0.3),
+                       "Signal to noise ratio" = c(sim4$s2n, sim21$s2n, sim22$s2n, sim23$s2n),
+                       check.names = FALSE)
+print(xtable(s2n_table, label = "tab:stability-s2n-table",
+       caption = "Parameters and signal to noise ratios for the four simulated datasets.",
+       digits = c(0,0,0,0,0, 2, 3)),
+      include.rownames = FALSE)
+```
+
+
+
+```{r}
+# ---- stability-sims-plots ----
+stability_combine_sim <- function(stability_ann_results){
+  st_plot <- data.frame(rank = c(stability_ann_results$st_res),
+                        lambda = rep(stability_ann_results$lambda, each = nrow(stability_ann_results$st_res)))
+  st_group <- group_by(st_plot, by = lambda)
+  st_sum <- summarize(st_group, var = var(rank), avg = mean(rank)) %>% rename(lambda = by)
+  st_sum <- full_join(st_sum, stability_ann_results$st_coef, by = "lambda")
+}
+stability_plots_sim <- function(sim_results, rank, title = "sim_results", subtitle = ""){
+  st_combined <- stability_combine_sim(sim_results)
+  # Plot mean vs variance
+  varmeanplot <- ggplot(st_combined, aes(x = avg, y = sqrt(var))) + 
+    geom_point() +
+    geom_vline(aes(xintercept = rank)) +
+    xlab("Mean estimated rank") + 
+    ylab("Standard deviation of subspace distance") +
+    ggtitle(title, subtitle = subtitle) +
+    theme_bw()
+  # Plot mean vs variance of coefficients
+  coefplot <- ggplot(st_combined, aes(x = avg, y = sqrt(var.subspace.coef))) + 
+    geom_point() +
+    geom_vline(aes(xintercept = rank)) +
+    xlab("Mean estimated rank") + 
+    ylab(expression(sqrt("Mean of coefficient ranks"))) +
+    ggtitle(title, subtitle = subtitle) +
+    theme_bw()
+  
+  return(list(rplot = varmeanplot, coefplot = coefplot))
+}
+```
+
+
+```{r}
+p21 <- stability_plots_sim(sim_res21, rank = r, title = "Simulation 2", subtitle = "b = 0.05")
+```
+
+```{r}
+p22 <- stability_plots_sim(sim_res22, rank = r, title = "Simulation 3", subtitle = "b = 0.1")
+```
+
+```{r}
+p23 <- stability_plots_sim(sim_res23, rank = r, title = "Simulation 4", subtitle = "b = 0.3")
+```
+
+```{r}
+p4 <- stability_plots_sim(sim_res4, rank = 0, title = "Simulation 1", subtitle = "b = 0")
+```
+
+```{r}
+# ---- stability-sims-rplots ----
+grid.arrange(p4$rplot, p21$rplot, p22$rplot, p23$rplot, nrow = 2)
+```
+
+```{r}
+# ---- stability-sims-coefplots ----
+grid.arrange(p4$coefplot, p21$coefplot, p22$coefplot, p23$coefplot, nrow = 2)
+```
+
+
+
+```{r}
+# ---- stability-sims-r0-plots ----
+grid.arrange(p4$rplot, p4$coefplot, nrow = 1)
+```
+
+
+
+```{r}
+# ---- rank1-sims ----
+# Simulations and plots for rank 1 matrices
+set.seed(9988999)
+n = 76 # samples
+q = 88 # number of response variables
+rho = 0.5 # correlation between Xs
+rX = 10 # rank of X
+p = 46 # number of explanatory variables
+simr1 <- rrr.sim6(n, p, q, r=1, b = 0.3, rho, rX)
+simr1$s2n
+sim_annr1 <- rrr2(simr1$Y, simr1$X, penaltySVD = "ann",
+                  modstr = list(gamma = 2))
+sim_resr1 <- stability_ann_sim(simr1$Y, simr1$X, sim_annr1$lambda, subset = 0.7, ntimes = 100)
+
+simr12 <- rrr.sim6(n, p, q, r=1, b = 0.05, rho, rX)
+simr12$s2n
+sim_annr12 <- rrr2(simr12$Y, simr12$X, penaltySVD = "ann",
+                  modstr = list(gamma = 2))
+sim_resr12 <- stability_ann_sim(simr12$Y, simr12$X, sim_annr12$lambda, subset = 0.7, ntimes = 100)
+
+simr13 <- rrr.sim6(n, p, q, r=1, b = 0.1, rho, rX)
+simr13$s2n
+sim_annr13 <- rrr2(simr13$Y, simr13$X, penaltySVD = "ann",
+                  modstr = list(gamma = 2))
+sim_resr13 <- stability_ann_sim(simr13$Y, simr13$X, sim_annr13$lambda, subset = 0.7, ntimes = 100)
+
+simr14 <- rrr.sim6(n, p, q, r=1, b = 0, rho, rX)
+simr14$s2n
+sim_annr14 <- rrr2(simr14$Y, simr14$X, penaltySVD = "ann",
+                   modstr = list(gamma = 2))
+sim_resr14 <- stability_ann_sim(simr14$Y, simr14$X, sim_annr14$lambda, subset = 0.7, ntimes = 100)
+
+pr1 <- stability_plots_sim(sim_resr1, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr1$s2n, 2)))
+pr12 <- stability_plots_sim(sim_resr12, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr12$s2n, 2)))
+pr13 <- stability_plots_sim(sim_resr13, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr13$s2n, 2)))
+pr14 <- stability_plots_sim(sim_resr14, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr14$s2n, 2)))
+```
+
+```{r}
+grid.arrange(pr1$coefplot, pr12$coefplot, pr13$coefplot, pr14$coefplot, nrow = 2)
+
+```
+
+
+
+
+
+
+
+
+
