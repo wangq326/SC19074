@@ -999,6 +999,29 @@ library(Rcpp)
 #dir_cpp <- '../Rcpp/' # Can create source file in Rstudio 
 #sourceCpp("rwme.cpp")
 
+sourceCpp(code = '
+          #include <Rcpp.h>
+          using namespace Rcpp;
+          
+          //[[Rcpp::export]]
+          NumericMatrix rwme(double sigma,double xo,int N){
+          NumericMatrix x(N,2);
+          x(0,0) = xo; 
+          x(1,0) = 1;
+          NumericVector u = runif(N); 
+          for (int i = 1; i < N ;i++){ 
+            double y = as<double>(rnorm(1, x(i-1,0), sigma));
+            double t = exp(-abs(y))/exp(-abs(x(i-1,0)));
+            if (u[i] > t){
+              x(i,0) = x(i-1,0); 
+              x(i,1) = 0;
+            }
+            else{ 
+              x(i,0) = y;
+              x(i,1) = 1;} 
+          };
+          return x;
+          }')
 
 
 
@@ -1031,25 +1054,25 @@ rw3 <- randomwalk(sigma[3], x0, N)
 rw4 <- randomwalk(sigma[4], x0, N)
 
 ## -----------------------------------------------------------------------------
-#rw5 <- rwme(sigma[1], x0, N)
-#rw6 <- rwme(sigma[2], x0, N) 
-#rw7 <- rwme(sigma[3], x0, N) 
-#rw8 <- rwme(sigma[4], x0, N)
+rw5 <- rwme(sigma[1], x0, N)
+rw6 <- rwme(sigma[2], x0, N) 
+rw7 <- rwme(sigma[3], x0, N) 
+rw8 <- rwme(sigma[4], x0, N)
 
 ## -----------------------------------------------------------------------------
 acR <- c(sum(rw1[,2]==1),sum(rw2[,2]==1),sum(rw3[,2]==1),sum(rw4[,2]==1))
-#acC <- c(sum(rw5[,2]==1),sum(rw6[,2]==1),sum(rw7[,2]==1),sum(rw8[,2]==1))
-rbind(sigma,acR)
+acC <- c(sum(rw5[,2]==1),sum(rw6[,2]==1),sum(rw7[,2]==1),sum(rw8[,2]==1))
+rbind(sigma,acR,acC)
 
 ## -----------------------------------------------------------------------------
 ####par(mfrow=c(2,2))
-#qqplot(rw1[rw1[,2]==1,1],rw5[rw5[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==0.05}))
-#qqplot(rw2[rw2[,2]==1,1],rw6[rw6[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==0.5}))
-#qqplot(rw3[rw3[,2]==1,1],rw7[rw7[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==2}))
-#qqplot(rw4[rw4[,2]==1,1],rw8[rw8[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==16}))
+qqplot(rw1[rw1[,2]==1,1],rw5[rw5[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==0.05}))
+qqplot(rw2[rw2[,2]==1,1],rw6[rw6[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==0.5}))
+qqplot(rw3[rw3[,2]==1,1],rw7[rw7[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==2}))
+qqplot(rw4[rw4[,2]==1,1],rw8[rw8[,2]==1,1],xlab = "rwR",ylab = "rwC",main = expression("Q-Q plot for" ~~ {sigma==16}))
 
 ## -----------------------------------------------------------------------------
 library(microbenchmark) 
-#ts <- microbenchmark(rwR1 <- randomwalk(sigma[1], x0, N) ,rwR2 <- randomwalk(sigma[2], x0, N) ,rwR3 <- randomwalk(sigma[3], x0, N) ,rwR4 <- randomwalk(sigma[4], x0, N) ,rwC1 <- rwme(sigma[1], x0, N) ,rwC2 <- rwme(sigma[2], x0, N) ,rwC3 <- rwme(sigma[3], x0, N)  ,rwC4 <- rwme(sigma[4], x0, N))
-#summary(ts)[,c(1,3,5,6)] 
+ts <- microbenchmark(rwR1 <- randomwalk(sigma[1], x0, N) ,rwR2 <- randomwalk(sigma[2], x0, N) ,rwR3 <- randomwalk(sigma[3], x0, N) ,rwR4 <- randomwalk(sigma[4], x0, N) ,rwC1 <- rwme(sigma[1], x0, N) ,rwC2 <- rwme(sigma[2], x0, N) ,rwC3 <- rwme(sigma[3], x0, N)  ,rwC4 <- rwme(sigma[4], x0, N))
+summary(ts)[,c(1,3,5,6)] 
 

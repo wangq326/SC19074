@@ -2,6 +2,10 @@
     "path" : "~/SC19074",
     "sortOrder" : [
         {
+            "ascending" : false,
+            "columnIndex" : 3
+        },
+        {
             "ascending" : true,
             "columnIndex" : 2
         }
