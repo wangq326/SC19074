@@ -1,0 +1,222 @@
+---
+title: "Introduction to SC19074"
+author: "19074"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to SC19074}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+__SC19074__ is R package developed to solve the tuning parameter $\lambda$ selection problem in reduced rank regression model. Seven functions are considered, namely, _get_coef_subspace_sim_ (obtain the variance under each lambda by the cofficient matrices) and _rrr.sim6_ (generate random samples) and _stability_ann_sim_(RRR via stability approach) and so on. 
+
+## Background
+
+Given $n$ observations of the response $y_i\in\mathcal{R}^q$ and predictor $x_i\in\mathcal{R}^p$, we consider themultivariate linear regression model $$Y =XC_0 + E,$$ where $Y =(y_1,...,y_n)^T, X =(x_1,...,x_n)^T$, $C_0$ is a $p\times q$ coefficient matrix, and $E =(e_1,...,e_n)^T$ is an $n\times q$ matrix of independently and identically distributed random errors with mean zero and variance $\sigma^2$. Throughout, we write $p∧q=min(p,q), n∧q=min(n,q)$, $r=r(C_0)$ and $r_x=r(X)$, where $r(·)$ denotes the rank of a matrix.
+
+The adaptive nuclear norm of a matrix $C\in\mathcal{R}^{p×q}$ is defined as a weighted sum of its singular values: $$\Vert C\Vert_{∗w} =\sum_{i=1}^{p∧q}w_id_i(C).$$ 
+
+Kun Chen propose to estimate $C_0$ by minimizing $$\frac12\Vert Y-XC\Vert^2_F+\lambda\Vert XC\Vert_{*w}.$$ He provided the solution function rrr in the R package rrpack. Based on this function in my package, I modified the return value and wrote it into the rrr2 function for later research.
+
+In the reduced rank regression model  via adaptive nuclear norm penalization proposed by Kun Chen, there is no tuning parameter selection method. We apply the stability method.
+
+For a given $\lambda$, we can get its instability as follows:
+1. Perform m non-replacement subsampling from the sample, the size of the subsample is about $\sqrt n$;
+2. Apply the RRR model proposed by Kun Chen for each sub-sampling to get the coefficient matrix $C_{1},...,C_ {m}.$
+3. Find the instability of $ C_{1}, ..., C_{m}$.
+
+We define the variance of these matrices as instability. The variance is defined as follows:
+$$var(\hat C_{1},\hat C_{2},...\hat C_{n})=(C_{2}^{n})^{-1}\sum_{i<j}d(\hat C_{i},\hat C_{j}).$$
+The distance between the two matrices is defined as $$d(\mathcal{A},\mathcal{B})=max{\sigma_{1}(A_{\bot}^{H}B),\sigma_{1}(B_{\bot}^{H}A)},$$ Where $A_{\bot}^{H}$ is the basis of the orthogonal complement of $\mathcal{A}$, and $A$ is a set of orthogonal basis of $\mathcal{A}$.
+
+## The main results
+
+```{r}
+library(tidyverse)
+library(rrpack)
+library(knitr)
+library(mvtnorm)
+library(gridExtra)
+library(MASS)
+library(xtable)
+set.seed(6419)
+```
+
+
+
+
+```{r}
+n = 38 # samples
+q = 44 # number of response variables
+rho = 0.5 # correlation between Xs
+rX = 8 # rank of X
+r = 5 # rank of C
+p = 23 # number of explanatory variables
+```
+
+
+b set to 0.05
+```{r}
+library(SC19074)
+sim21 <- rrr.sim6(n, p, q, r, b = 0.05, rho, rX)
+sim_ann21 <- rrr2(sim21$Y, sim21$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res21 <- stability_ann_sim(sim21$Y, sim21$X, sim_ann21$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+b set to 0.1
+
+```{r}
+sim22 <- rrr.sim6(n, p, q, r, b = 0.1, rho, rX)
+sim_ann22 <- rrr2(sim22$Y, sim22$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res22 <- stability_ann_sim(sim22$Y, sim22$X, sim_ann22$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+b set to 0.3
+
+```{r}
+sim23 <- rrr.sim6(n, p, q, r, b = 0.3, rho, rX)
+sim_ann23 <- rrr2(sim23$Y, sim23$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res23 <- stability_ann_sim(sim23$Y, sim23$X, sim_ann23$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+b set to 0
+
+```{r}
+# Rank 0
+# Generate X
+p = 46
+sim4 <- rrr.sim6(n, p, q, r, b = 0, rho, rX)
+sim_ann4 <- rrr2(sim4$Y, sim4$X, penaltySVD = "ann",
+                 modstr = list(gamma = 2))
+sim_res4 <- stability_ann_sim(sim4$Y, sim4$X, sim_ann4$lambda, subset = 0.7, ntimes = 100)
+```
+
+
+```{r}
+detach("package:rrpack", unload = TRUE)
+detach("package:MASS", unload=TRUE)
+
+# ---- stability-s2n-table ----
+# Table of signal to noise ratios for each simulation
+s2n_table <- data.frame(Simulation = 1:4, n = n, p = p, q = q, b = c(0, 0.05, 0.1, 0.3),
+                       "Signal to noise ratio" = c(sim4$s2n, sim21$s2n, sim22$s2n, sim23$s2n),
+                       check.names = FALSE)
+print(xtable(s2n_table, label = "tab:stability-s2n-table",
+       caption = "Parameters and signal to noise ratios for the four simulated datasets.",
+       digits = c(0,0,0,0,0, 2, 3)),
+      include.rownames = FALSE)
+```
+
+
+```{r}
+# ---- stability-sims-plots ----
+stability_combine_sim <- function(stability_ann_results){
+  st_plot <- data.frame(rank = c(stability_ann_results$st_res),
+                        lambda = rep(stability_ann_results$lambda, each = nrow(stability_ann_results$st_res)))
+  st_group <- group_by(st_plot, by = lambda)
+  st_sum <- summarize(st_group, var = var(rank), avg = mean(rank)) %>% rename(lambda = by)
+  st_sum <- full_join(st_sum, stability_ann_results$st_coef, by = "lambda")
+}
+stability_plots_sim <- function(sim_results, rank, title = "sim_results", subtitle = ""){
+  st_combined <- stability_combine_sim(sim_results)
+  # Plot mean vs variance
+  varmeanplot <- ggplot(st_combined, aes(x = avg, y = sqrt(var))) + 
+    geom_point() +
+    geom_vline(aes(xintercept = rank)) +
+    xlab("Mean estimated rank") + 
+    ylab("Standard deviation of subspace distance") +
+    ggtitle(title, subtitle = subtitle) +
+    theme_bw()
+  # Plot mean vs variance of coefficients
+  coefplot <- ggplot(st_combined, aes(x = avg, y = sqrt(var.subspace.coef))) + 
+    geom_point() +
+    geom_vline(aes(xintercept = rank)) +
+    xlab("Mean estimated rank") + 
+    ylab(expression(sqrt("Mean of coefficient ranks"))) +
+    ggtitle(title, subtitle = subtitle) +
+    theme_bw()
+  
+  return(list(rplot = varmeanplot, coefplot = coefplot))
+}
+```
+
+
+```{r}
+p21 <- stability_plots_sim(sim_res21, rank = r, title = "Simulation 2", subtitle = "b = 0.05")
+
+p22 <- stability_plots_sim(sim_res22, rank = r, title = "Simulation 3", subtitle = "b = 0.1")
+
+p23 <- stability_plots_sim(sim_res23, rank = r, title = "Simulation 4", subtitle = "b = 0.3")
+
+p4 <- stability_plots_sim(sim_res4, rank = 0, title = "Simulation 1", subtitle = "b = 0")
+```
+
+```{r}
+# ---- stability-sims-rplots ----
+grid.arrange(p4$rplot, p21$rplot, p22$rplot, p23$rplot, nrow = 2)
+
+# ---- stability-sims-coefplots ----
+grid.arrange(p4$coefplot, p21$coefplot, p22$coefplot, p23$coefplot, nrow = 2)
+
+# ---- stability-sims-r0-plots ----
+grid.arrange(p4$rplot, p4$coefplot, nrow = 1)
+```
+
+
+```{r}
+# ---- rank1-sims ----
+# Simulations and plots for rank 1 matrices
+set.seed(9988999)
+n = 38 # samples
+q = 44 # number of response variables
+rho = 0.5 # correlation between Xs
+rX = 8 # rank of X
+p = 23 # number of explanatory variables
+simr1 <- rrr.sim6(n, p, q, r=1, b = 0.3, rho, rX)
+simr1$s2n
+sim_annr1 <- rrr2(simr1$Y, simr1$X, penaltySVD = "ann",
+                  modstr = list(gamma = 2))
+sim_resr1 <- stability_ann_sim(simr1$Y, simr1$X, sim_annr1$lambda, subset = 0.7, ntimes = 100)
+
+simr12 <- rrr.sim6(n, p, q, r=1, b = 0.05, rho, rX)
+simr12$s2n
+sim_annr12 <- rrr2(simr12$Y, simr12$X, penaltySVD = "ann",
+                  modstr = list(gamma = 2))
+sim_resr12 <- stability_ann_sim(simr12$Y, simr12$X, sim_annr12$lambda, subset = 0.7, ntimes = 100)
+
+simr13 <- rrr.sim6(n, p, q, r=1, b = 0.1, rho, rX)
+simr13$s2n
+sim_annr13 <- rrr2(simr13$Y, simr13$X, penaltySVD = "ann",
+                  modstr = list(gamma = 2))
+sim_resr13 <- stability_ann_sim(simr13$Y, simr13$X, sim_annr13$lambda, subset = 0.7, ntimes = 100)
+
+simr14 <- rrr.sim6(n, p, q, r=1, b = 0, rho, rX)
+simr14$s2n
+sim_annr14 <- rrr2(simr14$Y, simr14$X, penaltySVD = "ann",
+                   modstr = list(gamma = 2))
+sim_resr14 <- stability_ann_sim(simr14$Y, simr14$X, sim_annr14$lambda, subset = 0.7, ntimes = 100)
+
+pr1 <- stability_plots_sim(sim_resr1, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr1$s2n, 2)))
+pr12 <- stability_plots_sim(sim_resr12, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr12$s2n, 2)))
+pr13 <- stability_plots_sim(sim_resr13, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr13$s2n, 2)))
+pr14 <- stability_plots_sim(sim_resr14, rank = 1, title = "", subtitle = paste("Signal-to-noise ratio: ", round(simr14$s2n, 2)))
+```
+
+```{r}
+grid.arrange(pr1$coefplot, pr12$coefplot, pr13$coefplot, pr14$coefplot, nrow = 2)
+```
+
+
+
+
+
+

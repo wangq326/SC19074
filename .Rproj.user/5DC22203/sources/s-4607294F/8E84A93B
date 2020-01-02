@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1577883674807.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "8E84A93B",
+    "lastKnownWriteTime" : 1577957575,
+    "last_content_update" : 1577957575071,
+    "path" : "~/SC19074/vignettes/intro.Rmd",
+    "project_path" : "vignettes/intro.Rmd",
+    "properties" : {
+        "cursorPosition" : "70,9",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

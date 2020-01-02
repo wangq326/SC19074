@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1577968715209.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "1282A1E8",
+    "lastKnownWriteTime" : 1577968755,
+    "last_content_update" : 1577968755955,
+    "path" : "~/SC19074/src/rwme.cpp",
+    "project_path" : "src/rwme.cpp",
+    "properties" : {
+        "cursorPosition" : "44,2",
+        "scrollLine" : "35",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "cpp"
+}
