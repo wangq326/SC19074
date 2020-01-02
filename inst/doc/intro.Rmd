@@ -13,6 +13,25 @@ vignette: >
 
 __SC19074__ is R package developed to solve the tuning parameter $\lambda$ selection problem in reduced rank regression model. Seven functions are considered, namely, _get_coef_subspace_sim_ (obtain the variance under each lambda by the cofficient matrices) and _rrr.sim6_ (generate random samples) and _stability_ann_sim_(RRR via stability approach) and so on. 
 
+## Background
+
+Given $n$ observations of the response $y_i\in\mathcal{R}^q$ and predictor $x_i\in\mathcal{R}^p$, we consider themultivariate linear regression model $$Y =XC_0 + E,$$ where $Y =(y_1,...,y_n)^T, X =(x_1,...,x_n)^T$, $C_0$ is a $p\times q$ coefficient matrix, and $E =(e_1,...,e_n)^T$ is an $n\times q$ matrix of independently and identically distributed random errors with mean zero and variance $\sigma^2$. Throughout, we write $p∧q=min(p,q), n∧q=min(n,q)$, $r=r(C_0)$ and $r_x=r(X)$, where $r(·)$ denotes the rank of a matrix.
+
+The adaptive nuclear norm of a matrix $C\in\mathcal{R}^{p×q}$ is defined as a weighted sum of its singular values: $$\Vert C\Vert_{∗w} =\sum_{i=1}^{p∧q}w_id_i(C).$$ 
+
+Kun Chen propose to estimate $C_0$ by minimizing $$\frac12\Vert Y-XC\Vert^2_F+\lambda\Vert XC\Vert_{*w}.$$ He provided the solution function rrr in the R package rrpack. Based on this function in my package, I modified the return value and wrote it into the rrr2 function for later research.
+
+In the reduced rank regression model  via adaptive nuclear norm penalization proposed by Kun Chen, there is no tuning parameter selection method. We apply the stability method.
+
+For a given $\lambda$, we can get its instability as follows:
+1. Perform m non-replacement subsampling from the sample, the size of the subsample is about $\sqrt n$;
+2. Apply the RRR model proposed by Kun Chen for each sub-sampling to get the coefficient matrix $C_{1},...,C_ {m}.$
+3. Find the instability of $ C_{1}, ..., C_{m}$.
+
+We define the variance of these matrices as instability. The variance is defined as follows:
+$$var(\hat C_{1},\hat C_{2},...\hat C_{n})=(C_{2}^{n})^{-1}\sum_{i<j}d(\hat C_{i},\hat C_{j}).$$
+The distance between the two matrices is defined as $$d(\mathcal{A},\mathcal{B})=max{\sigma_{1}(A_{\bot}^{H}B),\sigma_{1}(B_{\bot}^{H}A)},$$ Where $A_{\bot}^{H}$ is the basis of the orthogonal complement of $\mathcal{A}$, and $A$ is a set of orthogonal basis of $\mathcal{A}$.
+
 ## The main results
 
 ```{r}
@@ -26,9 +45,7 @@ library(xtable)
 set.seed(6419)
 ```
 
-In the reduced rank regression model  via adaptive nuclear norm penalization proposed by Kun Chen, there is no tuning parameter selection method. We apply the stability method. In this problem, we define the instability as: given a lambda, a regression coefficient matrix $\hat C$ can be obtained by applying the reduced rank regression model to each subsample. We define the variance of these matrices as instability. The variance is defined as follows:
-$$var(\hat C_{1},\hat C_{2},...\hat C_{n})=(C_{2}^{n})^{-1}\sum_{i<j}d(\hat C_{i},\hat C_{j}).$$
-The distance between the two matrices is defined as $$d(\mathcal{A},\mathcal{B})=max{\sigma_{1}(A_{\bot}^{H}B),\sigma_{1}(B_{\bot}^{H}A)},$$ Where $A_{\bot}^{H}$ is the basis of the orthogonal complement of $\mathcal{A}$, and $A$ is a set of orthogonal basis of $\mathcal{A}$.
+
 
 
 ```{r}
